@@ -1,0 +1,435 @@
+﻿const fs = require('fs');
+
+const code = `import type {
+  UserProfile,
+  StatItem,
+  ActivityDataPoint,
+  TopPerformer,
+  ChannelItem,
+  NotificationItem,
+  FriendItem,
+  GalleryItem,
+  TravelDestination,
+  DreamItem,
+  TaskItem,
+} from '../types';
+
+export const initialProfile: UserProfile = {
+  name: 'SHUBHAV KUMAR',
+  role: 'Software Developer',
+  avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
+  bio: 'I am a passionate Software Developer dedicated to architecting clean, scalable, and high-performance digital solutions. With expertise across modern frontend frameworks and robust backend microservices, I craft seamless user experiences driven by maintainable code. I love building thoughtful tools, exploring AI integrations, and turning ambitious concepts into real-world software products.',
+  email: 'shubhav.kumar@dev.io',
+  availableForWork: true,
+  location: 'Bangalore, India / Remote',
+  yearsExperience: 4,
+  completedProjects: 48,
+  satisfiedClients: 32,
+  skills: [
+    {
+      category: 'Frontend & UI',
+      items: ['React.js', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Framer Motion', 'Redux / Zustand'],
+    },
+    {
+      category: 'Backend & APIs',
+      items: ['Node.js', 'Express', 'Python', 'FastAPI', 'REST APIs', 'GraphQL'],
+    },
+    {
+      category: 'Databases & Cloud',
+      items: ['PostgreSQL', 'MongoDB', 'Redis', 'AWS', 'Docker', 'Vercel / Supabase'],
+    },
+    {
+      category: 'Tools & Practices',
+      items: ['Git / GitHub', 'CI/CD Pipelines', 'System Architecture', 'Agile / Scrum', 'Testing (Jest/Vitest)'],
+    },
+  ],
+  professionHighlights: [
+    {
+      title: 'Full-Stack Web Engineering',
+      description: 'Designing end-to-end web architectures with modern TypeScript, modular component hierarchies, and optimized data workflows.',
+    },
+    {
+      title: 'Performance & Scalability Optimization',
+      description: 'Building snappy interfaces with sub-100ms response times, efficient caching, and resilient database indexing.',
+    },
+    {
+      title: 'Creative UI Engineering & Systems',
+      description: 'Bridging technical engineering with elegant design tokens, accessible layouts, and fluid micro-interactions.',
+    },
+  ],
+};
+
+export const defaultStats: StatItem[] = [
+  {
+    id: 'views',
+    label: 'Views',
+    value: '27,6m',
+    change: '+14.8%',
+    trend: 'up',
+    description: 'Total profile & repository impressions across all platforms',
+    fullValue: '27,642,890',
+  },
+  {
+    id: 'followers',
+    label: 'Followers',
+    value: '219,3k',
+    change: '-2.1%',
+    trend: 'down',
+    description: 'Active developer community & peer network following code updates',
+    fullValue: '219,340',
+  },
+  {
+    id: 'reposts',
+    label: 'Reposts',
+    value: '1,5k',
+    change: '+8.4%',
+    trend: 'up',
+    description: 'Curated code snippets, technical articles, and GitHub stars',
+    fullValue: '1,528',
+  },
+];
+
+export const weeklyActivityData: ActivityDataPoint[] = [
+  { day: '01', label: 'Mon 01 May', value: 18000, formattedValue: '18,400', ratePerHour: '14,200 Views / hr' },
+  { day: '02', label: 'Tue 02 May', value: 28500, formattedValue: '28,500', ratePerHour: '22,400 Views / hr' },
+  { day: '03', label: 'Wed 03 May', value: 24000, formattedValue: '24,000', ratePerHour: '19,100 Views / hr' },
+  { day: '04', label: 'Thu 04 May', value: 12000, formattedValue: '12,000', ratePerHour: '9,800 Views / hr' },
+  { day: '05', label: 'Fri 05 May', value: 34000, formattedValue: '34,200', ratePerHour: '32 210 Views / hour', isPeak: true },
+  { day: '06', label: 'Sat 06 May', value: 22000, formattedValue: '22,000', ratePerHour: '17,500 Views / hr' },
+  { day: '07', label: 'Sun 07 May', value: 32000, formattedValue: '32,000', ratePerHour: '26,900 Views / hr' },
+];
+
+export const monthlyActivityData: ActivityDataPoint[] = [
+  { day: '01', label: 'Week 1', value: 15000, formattedValue: '95,000', ratePerHour: '21,000 Views / hr' },
+  { day: '02', label: 'Week 2', value: 26000, formattedValue: '142,000', ratePerHour: '27,500 Views / hr' },
+  { day: '03', label: 'Week 3', value: 21000, formattedValue: '118,000', ratePerHour: '23,100 Views / hr' },
+  { day: '04', label: 'Week 4', value: 36000, formattedValue: '184,000', ratePerHour: '38,200 Views / hr', isPeak: true },
+  { day: '05', label: 'Week 5', value: 29000, formattedValue: '150,000', ratePerHour: '31,000 Views / hr' },
+  { day: '06', label: 'Week 6', value: 24000, formattedValue: '125,000', ratePerHour: '24,800 Views / hr' },
+  { day: '07', label: 'Week 7', value: 33000, formattedValue: '170,000', ratePerHour: '33,500 Views / hr' },
+];
+
+export const topPerformersData: TopPerformer[] = [
+  {
+    id: 'valy',
+    name: 'Valy Antonova',
+    handle: '@valyantonova',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+    percentage: 39,
+    role: 'Lead UI/UX Engineer',
+    projectTitle: 'Crowz Design System & UI Kit',
+    description: 'A modular design token engine and component library built with React, Tailwind, and accessible WAI-ARIA primitives.',
+    tags: ['React', 'Tailwind CSS', 'TypeScript', 'Tokens'],
+    metrics: '39% user adoption, +420k downloads',
+    liveUrl: 'https://github.com',
+    githubUrl: 'https://github.com',
+    stars: 1240,
+    impactScore: 'High Impact',
+  },
+  {
+    id: 'mark',
+    name: 'Mark Noil',
+    handle: '@marknoil',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+    percentage: 18,
+    role: 'Backend Architect',
+    projectTitle: 'HyperScale Real-Time Telemetry',
+    description: 'High-throughput event streaming engine handling 50k+ requests/sec with Redis queues and Node.js microservices.',
+    tags: ['Node.js', 'Redis', 'Docker', 'PostgreSQL'],
+    metrics: '18% performance boost, 99.99% uptime',
+    liveUrl: 'https://github.com',
+    githubUrl: 'https://github.com',
+    stars: 890,
+    impactScore: 'Core Asset',
+  },
+  {
+    id: 'nenci',
+    name: 'Nenci Villy',
+    handle: '@nencivilly',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+    percentage: 25,
+    role: 'AI / Full Stack Lead',
+    projectTitle: 'Smart Assistant & Automation Portal',
+    description: 'AI-assisted code reviewer and developer automation portal integrating LLM inference with automated unit tests.',
+    tags: ['Next.js', 'Python', 'FastAPI', 'OpenAI'],
+    metrics: '25% share of total dev productivity',
+    liveUrl: 'https://github.com',
+    githubUrl: 'https://github.com',
+    stars: 650,
+    impactScore: 'Strategic',
+  },
+];
+
+export const channelsData: ChannelItem[] = [
+  {
+    id: 'dribbble',
+    name: 'Dribble',
+    handle: '@grantart',
+    change: '+2 %',
+    trend: 'positive',
+    iconType: 'dribbble',
+    iconBg: '#EA4C89',
+    followers: '45.2k Followers',
+    url: 'https://dribbble.com',
+    description: 'Visual explorations, micro-interactions, and mobile concepts',
+  },
+  {
+    id: 'behance',
+    name: 'Bahance',
+    handle: '@grantart',
+    change: '-7 %',
+    trend: 'negative',
+    iconType: 'behance',
+    iconBg: '#053EFF',
+    followers: '32.8k Followers',
+    url: 'https://behance.net',
+    description: 'Full case studies, brand identity packages, and client showcases',
+  },
+  {
+    id: 'instagram',
+    name: 'Instagram',
+    handle: '@robertgrant',
+    change: '+4 %',
+    trend: 'positive',
+    iconType: 'instagram',
+    iconBg: 'linear-gradient(135deg, #F97316, #EC4899, #8B5CF6)',
+    followers: '88.4k Followers',
+    url: 'https://instagram.com',
+    description: 'Behind the scenes, design tips, and daily developer logs',
+  },
+  {
+    id: 'pinterest',
+    name: 'Pinterest',
+    handle: '@robertgrant',
+    change: '+2 %',
+    trend: 'positive',
+    iconType: 'pinterest',
+    iconBg: '#E60023',
+    followers: '19.1k Followers',
+    url: 'https://pinterest.com',
+    description: 'Curated moodboards, color systems, and UI inspiration',
+  },
+];
+
+export const notificationsData: NotificationItem[] = [
+  {
+    id: 'notif-1',
+    title: 'New Collaboration Request',
+    description: 'A co-developer invited you to collaborate on an open-source Next.js micro-framework.',
+    time: '10m ago',
+    unread: true,
+    type: 'message',
+  },
+  {
+    id: 'notif-2',
+    title: 'Daily Code Commit Target Achieved',
+    description: 'Your streak reached 42 consecutive active development days.',
+    time: '2h ago',
+    unread: false,
+    type: 'metric',
+  },
+  {
+    id: 'notif-3',
+    title: 'Repository Star Milestone',
+    description: 'Your open source project surpassed 1,200 GitHub stars.',
+    time: '1d ago',
+    unread: false,
+    type: 'social',
+  },
+];
+
+export const friendsList: FriendItem[] = [
+  {
+    id: 'fr-1',
+    name: 'Aman Sharma',
+    role: 'Senior Full Stack Engineer',
+    avatar: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=200&q=80',
+    status: 'In Code Session',
+    connectionType: 'Co-developer',
+    socialHandle: '@amansh.dev',
+    mutualProjects: 6,
+  },
+  {
+    id: 'fr-2',
+    name: 'Priya Verma',
+    role: 'UI/UX Product Designer',
+    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80',
+    status: 'Online',
+    connectionType: 'Close Friend',
+    socialHandle: '@priyaux',
+    mutualProjects: 4,
+  },
+  {
+    id: 'fr-3',
+    name: 'Rohan Gupta',
+    role: 'Cloud & DevOps Specialist',
+    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=200&q=80',
+    status: 'Online',
+    connectionType: 'College Buddy',
+    socialHandle: '@rohandevops',
+    mutualProjects: 8,
+  },
+  {
+    id: 'fr-4',
+    name: 'Ananya Roy',
+    role: 'AI / ML Researcher',
+    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=200&q=80',
+    status: 'Traveling',
+    connectionType: 'Mentor',
+    socialHandle: '@ananya_ai',
+    mutualProjects: 3,
+  },
+  {
+    id: 'fr-5',
+    name: 'Vikram Mehta',
+    role: 'Mobile App Developer',
+    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80',
+    status: 'Offline',
+    connectionType: 'Co-developer',
+    socialHandle: '@vikram_mobile',
+    mutualProjects: 5,
+  },
+];
+
+export const galleryItems: GalleryItem[] = [
+  {
+    id: 'gal-1',
+    title: 'Triple Monitor Minimalist Battlestation',
+    category: 'Coding Setup',
+    imageUrl: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=800&q=80',
+    date: 'Aug 2025',
+    caption: 'Where clean architecture meets custom mechanical keycaps and endless coffee.',
+  },
+  {
+    id: 'gal-2',
+    title: 'Hackathon Grand Finals 2025',
+    category: 'Hackathons',
+    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?auto=format&fit=crop&w=800&q=80',
+    date: 'Nov 2025',
+    caption: '36 hours of non-stop coding with the team, building an AI-powered logistics routing app.',
+  },
+  {
+    id: 'gal-3',
+    title: 'Himachal Mountain Trekking & Remote Work',
+    category: 'Travel',
+    imageUrl: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+    date: 'Jan 2026',
+    caption: 'Coding at 9,000 feet with snow-capped mountain views.',
+  },
+  {
+    id: 'gal-4',
+    title: 'Tech Community Meetup & Keynote',
+    category: 'Personal',
+    imageUrl: 'https://images.unsplash.com/photo-1475721027785-f74eccf877e2?auto=format&fit=crop&w=800&q=80',
+    date: 'Feb 2026',
+    caption: 'Sharing insights on modern frontend state management patterns with 200+ developers.',
+  },
+];
+
+export const travelDestinations: TravelDestination[] = [
+  {
+    id: 'tr-1',
+    place: 'Manali & Spiti Valley',
+    country: 'India',
+    year: '2025',
+    status: 'Visited',
+    coverUrl: 'https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=800&q=80',
+    highlight: 'Rode through the highest motorable passes and star-gazed in remote valleys.',
+  },
+  {
+    id: 'tr-2',
+    place: 'Kyoto & Tokyo',
+    country: 'Japan',
+    year: '2026',
+    status: 'Planned',
+    coverUrl: 'https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?auto=format&fit=crop&w=800&q=80',
+    highlight: 'Exploring ancient temples, retro arcade culture, and cutting-edge tech districts.',
+  },
+  {
+    id: 'tr-3',
+    place: 'Swiss Alps & Interlaken',
+    country: 'Switzerland',
+    year: '2027',
+    status: 'Dream Destination',
+    coverUrl: 'https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?auto=format&fit=crop&w=800&q=80',
+    highlight: 'Panoramic Alpine train rides and high-altitude hiking expeditions.',
+  },
+];
+
+export const dreamsList: DreamItem[] = [
+  {
+    id: 'drm-1',
+    title: 'Launch a Developer Tool Used by 100k+ Engineers',
+    category: 'Tech Innovation',
+    status: 'In Progress',
+    targetDate: '2026',
+    description: 'Building an intuitive open-source developer tool that drastically accelerates web app scaffolding and API integration.',
+    progressPercent: 68,
+  },
+  {
+    id: 'drm-2',
+    title: 'Build a Self-Sustaining SaaS Ecosystem',
+    category: 'Career',
+    status: 'Target 2026',
+    targetDate: '2027',
+    description: 'Achieving financial and location independence by bootstrapping useful micro-SaaS products for modern teams.',
+    progressPercent: 45,
+  },
+  {
+    id: 'drm-3',
+    title: 'Give a Keynote Talk at a Global Tech Conference',
+    category: 'Personal',
+    status: 'Vision',
+    targetDate: '2027',
+    description: 'Presenting research on next-generation web rendering engines and AI-driven UI design systems.',
+    progressPercent: 30,
+  },
+  {
+    id: 'drm-4',
+    title: 'Set up an Off-Grid Dream Mountain Workspace',
+    category: 'Travel',
+    status: 'Vision',
+    targetDate: '2028',
+    description: 'A cozy solar-powered cabin studio in the Himalayas with high-speed satellite internet and clean mountain air.',
+    progressPercent: 20,
+  },
+];
+
+export const tasksList: TaskItem[] = [
+  {
+    id: 'tsk-1',
+    title: 'Refactor GraphQL subscription handling in SaaS engine',
+    status: 'In Progress',
+    priority: 'High',
+    category: 'Coding',
+    dueDate: 'Tomorrow',
+  },
+  {
+    id: 'tsk-2',
+    title: 'Complete Deep Learning & LLM Fine-Tuning Module',
+    status: 'Todo',
+    priority: 'Medium',
+    category: 'Learning',
+    dueDate: 'This Weekend',
+  },
+  {
+    id: 'tsk-3',
+    title: 'Deploy new portfolio dashboard to Vercel production',
+    status: 'Completed',
+    priority: 'High',
+    category: 'Coding',
+    dueDate: 'Today',
+  },
+  {
+    id: 'tsk-4',
+    title: 'Weekend 10k Marathon Training Run',
+    status: 'Todo',
+    priority: 'Medium',
+    category: 'Fitness',
+    dueDate: 'Sunday',
+  },
+];
+`;
+
+fs.writeFileSync('src/data/portfolioData.ts', code, 'utf8');
+console.log('Updated src/data/portfolioData.ts successfully');
