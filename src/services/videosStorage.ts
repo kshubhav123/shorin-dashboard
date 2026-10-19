@@ -123,18 +123,23 @@ export function normalizeVideoUrl(url?: string): string {
   return `https://${trimmed}`;
 }
 
+const emitVideosUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('videos-updated'));
+  }
+};
+
 // LocalStorage helpers for caching & offline resilience
 export function getLocalCachedVideos(): VideoItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      saveLocalCachedVideos(INITIAL_VIDEOS);
-      return INITIAL_VIDEOS;
+    if (raw !== null) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed;
+      }
     }
-    const parsed = JSON.parse(raw);
-    if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
-    }
+    saveLocalCachedVideos(INITIAL_VIDEOS);
     return INITIAL_VIDEOS;
   } catch (err) {
     console.warn('Could not read cached videos:', err);
@@ -172,27 +177,8 @@ export async function getStoredVideos(): Promise<VideoItem[]> {
         videoUrl: normalizeVideoUrl(v.videoUrl),
         thumbnailUrl: v.thumbnailUrl || (v.platform === 'YouTube' ? getYoutubeThumbnail(v.videoUrl) : ''),
       }));
-
-      // Preserve any videos that the user created locally that haven't synced yet
-      const local = getLocalCachedVideos();
-      const localOnly = local.filter(
-        (lv) => !sanitized.some((sv) => sv.id === lv.id || sv.title.trim() === lv.title.trim())
-      );
-      const merged = [...sanitized, ...localOnly];
-      saveLocalCachedVideos(merged);
-
-      // Background sync: push any localOnly videos to MongoDB
-      if (localOnly.length > 0) {
-        localOnly.forEach((videoToSync) => {
-          fetch(API_BASE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(videoToSync),
-          }).catch(() => {});
-        });
-      }
-
-      return merged;
+      saveLocalCachedVideos(sanitized);
+      return sanitized;
     }
     return getLocalCachedVideos();
   } catch (err) {
@@ -230,6 +216,7 @@ export async function addVideoToStorage(
       const saved: VideoItem = await response.json();
       const current = getLocalCachedVideos();
       saveLocalCachedVideos([saved, ...current.filter((v) => v.id !== saved.id)]);
+      emitVideosUpdated();
       return saved;
     }
   } catch (err) {
@@ -240,6 +227,7 @@ export async function addVideoToStorage(
   const current = getLocalCachedVideos();
   const updated = [newVideo, ...current];
   saveLocalCachedVideos(updated);
+  emitVideosUpdated();
   return newVideo;
 }
 
@@ -267,6 +255,7 @@ export async function updateVideoInStorage(video: VideoItem): Promise<VideoItem>
       const saved: VideoItem = await response.json();
       const current = getLocalCachedVideos();
       saveLocalCachedVideos(current.map((v) => (v.id === saved.id ? saved : v)));
+      emitVideosUpdated();
       return saved;
     }
   } catch (err) {
@@ -276,6 +265,7 @@ export async function updateVideoInStorage(video: VideoItem): Promise<VideoItem>
   // Local fallback
   const current = getLocalCachedVideos();
   saveLocalCachedVideos(current.map((v) => (v.id === updatedVideo.id ? updatedVideo : v)));
+  emitVideosUpdated();
   return updatedVideo;
 }
 
@@ -291,6 +281,7 @@ export async function deleteVideoFromStorage(id: string): Promise<boolean> {
     if (response.ok) {
       const current = getLocalCachedVideos();
       saveLocalCachedVideos(current.filter((v) => v.id !== id));
+      emitVideosUpdated();
       return true;
     }
   } catch (err) {
@@ -300,5 +291,6 @@ export async function deleteVideoFromStorage(id: string): Promise<boolean> {
   // Local fallback
   const current = getLocalCachedVideos();
   saveLocalCachedVideos(current.filter((v) => v.id !== id));
+  emitVideosUpdated();
   return true;
 }

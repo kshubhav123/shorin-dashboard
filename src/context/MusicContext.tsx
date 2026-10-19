@@ -106,16 +106,18 @@ export const MusicProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
     // Load playlists from storage / MongoDB
     getPlaylists().then((list) => {
-      if (list && list.length > 0) {
+      if (Array.isArray(list)) {
         setPlaylists(list);
       }
     });
 
     // Load saved songs from storage / MongoDB
     getSavedPlaylist().then((list) => {
-      setSavedPlaylist(list);
-      if (list.length > 0) {
-        setQueue(list);
+      if (Array.isArray(list)) {
+        setSavedPlaylist(list);
+        if (list.length > 0) {
+          setQueue(list);
+        }
       }
     });
 

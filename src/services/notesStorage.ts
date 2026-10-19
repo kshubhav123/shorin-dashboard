@@ -47,7 +47,7 @@ export async function getStoredNotes(): Promise<NoteItem[]> {
     const res = await fetch(API_NOTES);
     if (res.ok) {
       const data: NoteItem[] = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         saveLocalNotes(data);
         return data;
       }
@@ -57,6 +57,12 @@ export async function getStoredNotes(): Promise<NoteItem[]> {
   }
   return getLocalNotes();
 }
+
+const emitNotesUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('notes-updated'));
+  }
+};
 
 /**
  * Add note to MongoDB Atlas and LocalStorage
@@ -83,6 +89,7 @@ export async function addNoteToStorage(
       const saved: NoteItem = await res.json();
       const current = getLocalNotes();
       saveLocalNotes([saved, ...current.filter((n) => n.id !== saved.id)]);
+      emitNotesUpdated();
       return saved;
     }
   } catch (err) {
@@ -92,6 +99,7 @@ export async function addNoteToStorage(
   const current = getLocalNotes();
   const updated = [newNote, ...current.filter((n) => n.id !== newNote.id)];
   saveLocalNotes(updated);
+  emitNotesUpdated();
   return newNote;
 }
 
@@ -115,6 +123,7 @@ export async function updateNoteInStorage(
       const updated: NoteItem = await res.json();
       const current = getLocalNotes();
       saveLocalNotes(current.map((n) => (n.id === id ? updated : n)));
+      emitNotesUpdated();
       return updated;
     }
   } catch (err) {
@@ -130,6 +139,7 @@ export async function updateNoteInStorage(
   };
 
   saveLocalNotes(current.map((n) => (n.id === id ? updatedNote : n)));
+  emitNotesUpdated();
   return updatedNote;
 }
 
@@ -143,6 +153,7 @@ export async function toggleNotePinInStorage(id: string): Promise<NoteItem> {
       const updated: NoteItem = await res.json();
       const current = getLocalNotes();
       saveLocalNotes(current.map((n) => (n.id === id ? updated : n)));
+      emitNotesUpdated();
       return updated;
     }
   } catch (err) {
@@ -156,6 +167,7 @@ export async function toggleNotePinInStorage(id: string): Promise<NoteItem> {
     : ({} as NoteItem);
 
   saveLocalNotes(current.map((n) => (n.id === id ? updatedNote : n)));
+  emitNotesUpdated();
   return updatedNote;
 }
 
@@ -171,6 +183,7 @@ export async function deleteNoteFromStorage(id: string): Promise<boolean> {
 
   const current = getLocalNotes();
   saveLocalNotes(current.filter((n) => n.id !== id));
+  emitNotesUpdated();
   return true;
 }
 
@@ -178,9 +191,9 @@ export async function deleteNoteFromStorage(id: string): Promise<boolean> {
 function getLocalNotes(): NoteItem[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
   return STARTER_NOTES;

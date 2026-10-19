@@ -8,6 +8,7 @@ import { Video } from './models/Video.js';
 import { SavedSong } from './models/SavedSong.js';
 import { Playlist } from './models/Playlist.js';
 import { Note } from './models/Note.js';
+import { Setting } from './models/Setting.js';
 
 dotenv.config();
 
@@ -209,6 +210,12 @@ const INITIAL_SEED_NOTES = [
 
 async function seedDatabaseIfEmpty() {
   try {
+    const isSeeded = await Setting.findOne({ key: 'has_seeded_initial_data' });
+    if (isSeeded) {
+      console.log('⚡ Initial database seed already completed previously. Preserving all user deletions and additions.');
+      return;
+    }
+
     const projectCount = await Project.countDocuments();
     if (projectCount === 0) {
       console.log('🌱 Seeding initial projects into MongoDB...');
@@ -244,6 +251,9 @@ async function seedDatabaseIfEmpty() {
     } else {
       console.log(`📝 MongoDB already contains ${noteCount} notes.`);
     }
+
+    await Setting.create({ key: 'has_seeded_initial_data', value: true, updatedAt: Date.now() });
+    console.log('🔒 Seed flag saved: initial starter content seeded. Future restarts will respect user deletions.');
   } catch (err) {
     console.error('⚠️ Could not check/seed database:', err);
   }

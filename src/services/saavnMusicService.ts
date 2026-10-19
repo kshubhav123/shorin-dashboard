@@ -121,7 +121,7 @@ export async function getPlaylists(): Promise<PlaylistItem[]> {
     const res = await fetch(API_PLAYLISTS);
     if (res.ok) {
       const data: PlaylistItem[] = await res.json();
-      if (Array.isArray(data) && data.length > 0) {
+      if (Array.isArray(data)) {
         saveLocalPlaylists(data);
         return data;
       }
@@ -208,7 +208,7 @@ export async function getSavedPlaylist(): Promise<SongItem[]> {
     const res = await fetch(API_PLAYLIST);
     if (res.ok) {
       const songs: SongItem[] = await res.json();
-      if (Array.isArray(songs) && songs.length > 0) {
+      if (Array.isArray(songs)) {
         // Ensure playlists array is initialized
         const normalized = songs.map((s) => ({
           ...s,
@@ -354,9 +354,9 @@ export async function removeSongFromPlaylist(
 function getLocalPlaylist(): SongItem[] {
   try {
     const raw = localStorage.getItem(PLAYLIST_STORAGE_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
   return STARTER_POPULAR_SONGS;
@@ -371,9 +371,9 @@ function saveLocalPlaylist(songs: SongItem[]) {
 function getLocalPlaylists(): PlaylistItem[] {
   try {
     const raw = localStorage.getItem(PLAYLISTS_META_KEY);
-    if (raw) {
+    if (raw !== null) {
       const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      if (Array.isArray(parsed)) return parsed;
     }
   } catch {}
   return DEFAULT_PLAYLISTS;

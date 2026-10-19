@@ -123,13 +123,8 @@ export async function getStoredProjects(): Promise<ProjectItem[]> {
         ...p,
         lpUrl: p.lpUrl ? normalizeUrl(p.lpUrl) : 'https://github.com',
       }));
-      const local = getLocalCachedProjects();
-      const localOnly = local.filter(
-        (lp) => !sanitized.some((sp) => sp.id === lp.id || sp.name.trim() === lp.name.trim())
-      );
-      const merged = [...sanitized, ...localOnly];
-      saveLocalCachedProjects(merged);
-      return merged;
+      saveLocalCachedProjects(sanitized);
+      return sanitized;
     }
     const cached = getLocalCachedProjects().map((p) => ({
       ...p,
@@ -173,6 +168,12 @@ export async function checkDatabaseStatus(): Promise<{
   }
 }
 
+const emitProjectsUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('projects-updated'));
+  }
+};
+
 /**
  * Add a new project to MongoDB Atlas.
  */
@@ -196,6 +197,7 @@ export async function addProjectToStorage(
       const saved: ProjectItem = await response.json();
       const current = getLocalCachedProjects();
       saveLocalCachedProjects([saved, ...current.filter((p) => p.id !== saved.id)]);
+      emitProjectsUpdated();
       return saved;
     }
   } catch (err) {
@@ -206,6 +208,7 @@ export async function addProjectToStorage(
   const current = getLocalCachedProjects();
   const updated = [newProject, ...current];
   saveLocalCachedProjects(updated);
+  emitProjectsUpdated();
   return newProject;
 }
 
@@ -224,6 +227,7 @@ export async function updateProjectInStorage(project: ProjectItem): Promise<Proj
       const updated: ProjectItem = await response.json();
       const current = getLocalCachedProjects();
       saveLocalCachedProjects(current.map((p) => (p.id === updated.id ? updated : p)));
+      emitProjectsUpdated();
       return updated;
     }
   } catch (err) {
@@ -234,6 +238,7 @@ export async function updateProjectInStorage(project: ProjectItem): Promise<Proj
   const current = getLocalCachedProjects();
   const updated = current.map((p) => (p.id === project.id ? project : p));
   saveLocalCachedProjects(updated);
+  emitProjectsUpdated();
   return project;
 }
 
@@ -253,6 +258,7 @@ export async function deleteProjectFromStorage(id: string): Promise<void> {
   const current = getLocalCachedProjects();
   const updated = current.filter((p) => p.id !== id);
   saveLocalCachedProjects(updated);
+  emitProjectsUpdated();
 }
 
 /**
