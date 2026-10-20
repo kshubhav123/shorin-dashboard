@@ -3,10 +3,7 @@ import {
   ArrowRight,
   Code2,
   Briefcase,
-  Building2,
-  Globe,
   FolderPlus,
-  FolderGit2,
 } from 'lucide-react';
 import { getStoredProjects } from '../../services/projectsStorage';
 import type { ProjectItem } from '../../types';
@@ -61,16 +58,6 @@ export const RecentProjectsCard: React.FC<RecentProjectsCardProps> = ({
           icon: <Briefcase size={16} className="text-[#F97316]" strokeWidth={2} />,
           badgeBg: 'bg-[#FFF1E8]',
         };
-      case 'Company Project':
-        return {
-          icon: <Building2 size={16} className="text-[#8B5CF6]" strokeWidth={2} />,
-          badgeBg: 'bg-[#EDE9FE]',
-        };
-      case 'Open Source':
-        return {
-          icon: <Globe size={16} className="text-[#3B82F6]" strokeWidth={2} />,
-          badgeBg: 'bg-[#E8F2FF]',
-        };
       case 'Personal / Practice':
       default:
         return {
@@ -87,11 +74,6 @@ export const RecentProjectsCard: React.FC<RecentProjectsCardProps> = ({
         return {
           label: 'Live',
           badgeClass: 'bg-[#E3F5F2] text-[#0D9488]',
-        };
-      case 'In Progress':
-        return {
-          label: 'In Progress',
-          badgeClass: 'bg-[#EDE9FE] text-[#6D28D9]',
         };
       case 'Pending':
       default:
