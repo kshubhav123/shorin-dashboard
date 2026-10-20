@@ -3,7 +3,6 @@ import type { NavTab, UserProfile, TopPerformer } from './types';
 import {
   initialProfile,
   alternateProfiles,
-  topPerformersData,
   notificationsData,
 } from './data/portfolioData';
 
@@ -12,11 +11,8 @@ import { MobileNav } from './components/sidebar/MobileNav';
 import { Header } from './components/header/Header';
 
 import { HeroBanner } from './components/dashboard/HeroBanner';
-import { MetricCards } from './components/dashboard/MetricCards';
-import { SkillSetCard } from './components/dashboard/SkillSetCard';
-import { SocialLinksCard } from './components/dashboard/SocialLinksCard';
-import { RecentProjectsCard } from './components/dashboard/RecentProjectsCard';
-import { CtaBannerCard } from './components/dashboard/CtaBannerCard';
+import { DashboardMusicCard } from './components/dashboard/DashboardMusicCard';
+import { DashboardNotesCard } from './components/dashboard/DashboardNotesCard';
 
 import { FriendsView } from './components/views/FriendsView';
 import { GalleryView } from './components/views/GalleryView';
@@ -47,6 +43,8 @@ export const App: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<TopPerformer | null>(null);
 
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const unreadCount = notifications.filter((n) => n.unread).length;
 
   const handleMarkAllRead = () => {
@@ -62,18 +60,23 @@ export const App: React.FC = () => {
   return (
     <MusicProvider>
       <main className="min-h-screen w-full bg-[#FAF7F4] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-[#14B8A6] selection:text-white relative">
-        {/* Left Sidebar */}
+        {/* Left Sidebar (Desktop fixed + Mobile off-canvas drawer) */}
         <Sidebar
           currentTab={currentTab}
-          onSelectTab={setCurrentTab}
+          onSelectTab={(tab) => {
+            setCurrentTab(tab);
+            setIsMobileMenuOpen(false);
+          }}
           profile={profile}
           onOpenContact={() => setIsContactOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          isOpenMobile={isMobileMenuOpen}
+          onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
 
         {/* Main Content Area */}
-        <section className="flex-1 bg-white p-4 sm:p-6 md:p-7 lg:p-8 flex flex-col justify-between overflow-y-auto min-h-screen">
-          <div className="max-w-7xl w-full mx-auto flex flex-col justify-between flex-1 space-y-5 sm:space-y-6">
+        <section className="flex-1 bg-white p-3.5 sm:p-6 md:p-7 lg:p-8 flex flex-col justify-between overflow-y-auto min-h-screen pb-24 md:pb-8">
+          <div className="max-w-7xl w-full mx-auto flex flex-col justify-between flex-1 space-y-4 sm:space-y-6">
             
             {/* Top Header */}
             <Header
@@ -81,6 +84,7 @@ export const App: React.FC = () => {
               unreadCount={unreadCount}
               onOpenNotifications={() => setIsNotificationsOpen(true)}
               onOpenSettings={() => setIsSettingsOpen(true)}
+              onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
             />
 
             {/* Conditional Content based on Tab */}
@@ -92,32 +96,19 @@ export const App: React.FC = () => {
                   onExploreClick={() => setCurrentTab('Projects')}
                 />
 
-                {/* Row 2: 4 Metric Cards (Profession, Experience, Company, Goal) */}
-                <MetricCards />
+                {/* Responsive Music Player (Firstly) & Quick Notepad Hub */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch">
+                  {/* 1. Live Responsive Music Player Card (Firstly) */}
+                  <DashboardMusicCard
+                    onNavigateToMusic={() => setCurrentTab('Music')}
+                  />
 
-                {/* Row 3: 3 Column Feature Cards Grid (Desktop: 3 cols, Tablet: 2 cols, Mobile: 1 col) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
-                  {/* 1. Skill Set Card */}
-                  <SkillSetCard onViewAll={() => setCurrentTab('Projects')} />
-
-                  {/* 2. Social Media Links Card */}
-                  <SocialLinksCard />
-
-                  {/* 3. Recent Projects Card */}
-                  <RecentProjectsCard
-                    onViewAll={() => setCurrentTab('Projects')}
-                    onSelectProject={(title) => {
-                      const found = topPerformersData.find((p) =>
-                        p.projectTitle.toLowerCase().includes(title.toLowerCase().split(' ')[0])
-                      );
-                      if (found) setSelectedProject(found);
-                      else setCurrentTab('Projects');
-                    }}
+                  {/* 2. Quick Notepad / Add Note Card */}
+                  <DashboardNotesCard
+                    onNavigateToNotepad={() => setCurrentTab('Notepad')}
+                    onOpenAddModal={() => setCurrentTab('Notepad')}
                   />
                 </div>
-
-                {/* Row 4: Collaboration CTA Banner */}
-                <CtaBannerCard onContactClick={() => setIsContactOpen(true)} />
               </div>
             ) : currentTab === 'Friend List' ? (
               <FriendsView />
