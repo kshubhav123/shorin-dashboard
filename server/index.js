@@ -893,18 +893,33 @@ app.delete('/api/notes/:id', async (req, res) => {
   }
 });
 
-// Connect to MongoDB Atlas and start server
+// Cached MongoDB connection helper (supports both local server and Vercel serverless)
+let cachedConnection = null;
+
+export async function connectDB() {
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+
+  const uri = process.env.MONGODB_URI || MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI environment variable is missing.');
+  }
+
+  cachedConnection = await mongoose.connect(uri, {
+    bufferCommands: false,
+  });
+
+  await seedDatabaseIfEmpty();
+  return cachedConnection;
+}
+
+// Connect to MongoDB Atlas and start local listener
 async function startServer() {
   try {
     console.log('📡 Connecting to MongoDB Atlas cluster...');
-    if (!MONGODB_URI) {
-      throw new Error('MONGODB_URI environment variable is missing.');
-    }
-
-    await mongoose.connect(MONGODB_URI);
+    await connectDB();
     console.log('🌿 MongoDB Atlas connected successfully! (Cluster: cluster0.slho0dw.mongodb.net)');
-
-    await seedDatabaseIfEmpty();
 
     app.listen(PORT, () => {
       console.log(`🚀 Shorin Portfolio API Server running on http://localhost:${PORT}`);
@@ -918,4 +933,10 @@ async function startServer() {
   }
 }
 
-startServer();
+// Only start direct listener when NOT in Vercel serverless environment
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export default app;
+export { app };
