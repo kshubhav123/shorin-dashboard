@@ -31,8 +31,19 @@ import { ContactModal } from './components/modals/ContactModal';
 import { ProjectModal } from './components/modals/ProjectModal';
 import { NotificationsModal } from './components/modals/NotificationsModal';
 import { SettingsModal } from './components/modals/SettingsModal';
+import { PasswordLockScreen } from './components/auth/PasswordLockScreen';
+import { AIVoiceAssistant } from './components/ai/AIVoiceAssistant';
 
 export const App: React.FC = () => {
+  // Authentication Lock Screen state (persisted in sessionStorage)
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('crowz_auth_unlocked') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   const [currentTab, setCurrentTab] = useState<NavTab>('Dashboard');
   const [profile, setProfile] = useState<UserProfile>(initialProfile);
   const [notifications, setNotifications] = useState(notificationsData);
@@ -41,6 +52,7 @@ export const App: React.FC = () => {
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isAIAssistantOpen, setIsAIAssistantOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<TopPerformer | null>(null);
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -57,6 +69,23 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleUnlock = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    try {
+      sessionStorage.removeItem('crowz_auth_unlocked');
+      sessionStorage.removeItem('crowz_auth_token');
+    } catch {}
+    setIsAuthenticated(false);
+  };
+
+  // If locked, render ONLY the PasswordLockScreen. Zero dashboard DOM nodes exist until unlocked!
+  if (!isAuthenticated) {
+    return <PasswordLockScreen onUnlock={handleUnlock} />;
+  }
+
   return (
     <MusicProvider>
       <main className="min-h-screen w-full bg-[#FAF7F4] flex flex-col md:flex-row font-sans text-neutral-900 selection:bg-[#14B8A6] selection:text-white relative">
@@ -70,6 +99,7 @@ export const App: React.FC = () => {
           profile={profile}
           onOpenContact={() => setIsContactOpen(true)}
           onOpenSettings={() => setIsSettingsOpen(true)}
+          onLogout={handleLogout}
           isOpenMobile={isMobileMenuOpen}
           onCloseMobile={() => setIsMobileMenuOpen(false)}
         />
@@ -84,6 +114,7 @@ export const App: React.FC = () => {
               unreadCount={unreadCount}
               onOpenNotifications={() => setIsNotificationsOpen(true)}
               onOpenSettings={() => setIsSettingsOpen(true)}
+              onOpenAIAssistant={() => setIsAIAssistantOpen(true)}
               onToggleMobileMenu={() => setIsMobileMenuOpen((prev) => !prev)}
             />
 
@@ -169,6 +200,24 @@ export const App: React.FC = () => {
           onClose={() => setIsSettingsOpen(false)}
           currentProfile={profile}
           onSwitchProfile={handleSwitchProfile}
+        />
+
+        {/* Interactive AI Voice Assistant (Oral voice control copilot) */}
+        <AIVoiceAssistant
+          currentTab={currentTab}
+          onSelectTab={(tab) => setCurrentTab(tab)}
+          onOpenContact={() => setIsContactOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenNotifications={() => setIsNotificationsOpen(true)}
+          onCloseModals={() => {
+            setIsContactOpen(false);
+            setIsSettingsOpen(false);
+            setIsNotificationsOpen(false);
+            setSelectedProject(null);
+          }}
+          onLogout={handleLogout}
+          isOpenExternal={isAIAssistantOpen}
+          onCloseExternal={() => setIsAIAssistantOpen(false)}
         />
       </main>
     </MusicProvider>

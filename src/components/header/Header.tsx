@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Settings, Sun, Menu } from 'lucide-react';
+import { Bell, Settings, Sun, Menu, Sparkles } from 'lucide-react';
 import type { NavTab } from '../../types';
 
 interface HeaderProps {
@@ -7,6 +7,7 @@ interface HeaderProps {
   unreadCount: number;
   onOpenNotifications: () => void;
   onOpenSettings: () => void;
+  onOpenAIAssistant?: () => void;
   onToggleMobileMenu?: () => void;
 }
 
@@ -15,6 +16,7 @@ export const Header: React.FC<HeaderProps> = ({
   unreadCount,
   onOpenNotifications,
   onOpenSettings,
+  onOpenAIAssistant,
   onToggleMobileMenu,
 }) => {
   return (
@@ -53,8 +55,21 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Top Right Header Controls: Bell (with badge), Settings, Theme */}
+      {/* Top Right Header Controls: AI Assistant, Bell, Settings, Theme */}
       <div className="flex items-center gap-1.5 sm:gap-2 ml-auto shrink-0">
+        {/* Crowz AI Voice Assistant Trigger */}
+        {onOpenAIAssistant && (
+          <button
+            onClick={onOpenAIAssistant}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-full bg-gradient-to-r from-[#14B8A6]/10 to-[#DF886F]/10 hover:from-[#14B8A6]/20 hover:to-[#DF886F]/20 text-[#0F766E] border border-[#14B8A6]/30 transition-all cursor-pointer shadow-2xs active:scale-95 group"
+            title="Open Crowz AI Voice Assistant"
+          >
+            <Sparkles size={15} className="text-[#14B8A6] group-hover:rotate-12 transition-transform" />
+            <span className="font-bold text-xs tracking-tight">AI Voice</span>
+            <span className="w-1.5 h-1.5 rounded-full bg-[#14B8A6] animate-pulse hidden sm:inline-block" />
+          </button>
+        )}
+
         {/* Notification Bell with Badge */}
         <button
           onClick={onOpenNotifications}

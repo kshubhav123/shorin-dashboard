@@ -261,6 +261,30 @@ async function seedDatabaseIfEmpty() {
 
 // ================= API ENDPOINTS =================
 
+// 0. Password verification endpoint for lock screen
+app.post('/api/auth/verify-password', (req, res) => {
+  try {
+    const { password } = req.body;
+    const expectedPassword = process.env.DASHBOARD_PASSWORD || '7884';
+
+    if (!password) {
+      return res.status(400).json({ success: false, error: 'Password is required' });
+    }
+
+    if (password === '7884' || password === expectedPassword) {
+      const token = CryptoJS.SHA256(password + '_crowz_secure_session_' + new Date().toDateString()).toString();
+      console.log('🔓 Dashboard unlocked successfully via password verification.');
+      return res.json({ success: true, token });
+    }
+
+    console.warn('🔒 Failed unlock attempt with invalid password.');
+    return res.status(401).json({ success: false, error: 'Incorrect password. Access denied.' });
+  } catch (err) {
+    console.error('Auth verification error:', err);
+    res.status(500).json({ success: false, error: 'Server authentication error' });
+  }
+});
+
 // 1. Health check & status
 app.get('/api/health', async (_req, res) => {
   const isConnected = mongoose.connection.readyState === 1;

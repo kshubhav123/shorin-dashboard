@@ -16,6 +16,7 @@ interface SidebarProps {
   profile: UserProfile;
   onOpenContact: () => void;
   onOpenSettings: () => void;
+  onLogout?: () => void;
   isOpenMobile?: boolean;
   onCloseMobile?: () => void;
 }
@@ -26,6 +27,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   profile,
   onOpenContact,
   onOpenSettings,
+  onLogout,
   isOpenMobile = false,
   onCloseMobile,
 }) => {
@@ -47,8 +49,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
     if (onCloseMobile) onCloseMobile();
   };
 
-  const handleContactClick = () => {
-    onOpenContact();
+  const handleLogoutClick = () => {
+    if (onLogout) {
+      onLogout();
+    } else {
+      onOpenContact();
+    }
     if (onCloseMobile) onCloseMobile();
   };
 
@@ -149,14 +155,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Bottom Action */}
       <div className="pt-4 border-t border-[#EAE2D9] mt-6">
         <button
-          onClick={handleContactClick}
+          onClick={handleLogoutClick}
           className="flex items-center gap-2.5 text-neutral-500 hover:text-neutral-900 transition-colors group text-sm font-medium w-full text-left cursor-pointer px-1 py-1"
+          title="Lock Dashboard"
         >
           <div className="w-6 h-6 rounded-full bg-neutral-900 text-white flex items-center justify-center transition-transform group-hover:scale-110">
             <LogOut size={12} className="rotate-180" />
           </div>
           <span className="text-[13px] text-neutral-600 group-hover:text-neutral-900 transition-colors">
-            Log out
+            Lock Dashboard
           </span>
         </button>
       </div>

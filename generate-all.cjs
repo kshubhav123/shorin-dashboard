@@ -1,4 +1,4 @@
-﻿const fs = require('fs');
+const fs = require('fs');
 
 const sidebarCode = `import React from 'react';
 import { NavTab, UserProfile } from '../../types';
@@ -80,11 +80,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 key={item.id}
                 onClick={() => onSelectTab(item.id)}
-                className={`flex items-center justify-between text-left px-2 py-1 rounded-lg transition-all duration-200 group \${
+                className={\`flex items-center justify-between text-left px-2 py-1 rounded-lg transition-all duration-200 group \${
                   isActive
                     ? 'text-neutral-900 font-bold'
                     : 'text-neutral-500 font-normal hover:text-neutral-900 hover:translate-x-1'
-                }`}
+                }\`}
               >
                 <span className="text-[15px] tracking-tight">{item.label}</span>
                 {item.badge && (
@@ -143,9 +143,9 @@ export const MobileNav: React.FC<MobileNavProps> = ({ currentTab, onSelectTab })
           <button
             key={tab.id}
             onClick={() => onSelectTab(tab.id)}
-            className={`relative flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors \${
+            className={\`relative flex flex-col items-center gap-1 py-1 px-3 rounded-xl transition-colors \${
               isActive ? 'text-neutral-900 font-bold' : 'text-neutral-400 font-medium'
-            }`}
+            }\`}
           >
             <div className="relative">
               {tab.icon}
